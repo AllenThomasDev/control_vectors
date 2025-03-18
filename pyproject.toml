@@ -4,4 +4,18 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = []
+dependencies = [
+    "nltk",
+    "pandas",
+    "openai",
+    "numpy",
+    "torch",
+    "transformers",
+    "repeng",
+    "vaderSentiment",
+    "gradio",
+    "typing_extensions",
+    "openai",
+    "accelerate",
+    "huggingface_hub"
+]
