@@ -17,5 +17,6 @@ dependencies = [
     "typing_extensions",
     "openai",
     "accelerate",
-    "huggingface_hub"
+    "huggingface_hub",
+    "plotly"
 ]
