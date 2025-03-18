@@ -140,15 +140,21 @@ def collect_responses_with_vectors(
     vector_names = list(vectors.keys())
     num_vectors = len(vector_names)
 
+    # Generate all combinations of strengths for the given number of vectors
     strength_combinations = list(product(strengths, repeat=num_vectors))
     results = []
     for combo in tqdm(strength_combinations, desc="Generating responses"):
-        # Scale each vector by its strength and sum them
+        # Scale each vector by its strength
         scaled_vectors = [
             vectors[name] * strength for name, strength in zip(vector_names, combo)
         ]
-        # Handle empty case, though unlikely here
-        combined_vector = sum(scaled_vectors) if scaled_vectors else None
+        # Sum the scaled vectors by starting with the first vector and adding the rest
+        if scaled_vectors:
+            combined_vector = scaled_vectors[0]
+            for v in scaled_vectors[1:]:
+                combined_vector += v
+        else:
+            combined_vector = None
 
         if combined_vector is not None:
             response = generate_with_vector(
@@ -157,6 +163,7 @@ def collect_responses_with_vectors(
         else:
             response = "No vectors provided"
 
+        # Build result dictionary dynamically
         result = {f"vector{i + 1}_name": name for i, name in enumerate(vector_names)}
         result.update(
             {
