@@ -1,4 +1,6 @@
 import torch
+import pandas as pd
+import numpy as np
 import os
 from repeng import ControlVector, DatasetEntry
 
@@ -102,3 +104,52 @@ def generate_with_vector(
 
     model.reset()
     return None
+
+
+def collect_responses_with_vectors(
+    input_text: str,
+    model,
+    tokenizer,
+    vectors: list,
+    vector_names: list,
+    strength_range=(-2, 2, 0.5),
+    max_new_tokens: int = 256,
+    save_to_csv: str = None,
+):
+    """Collect responses by applying all combinations of strengths to control vectors."""
+    start, end, step = strength_range
+    strengths = np.arange(start, end + step, step)
+    results = []
+
+    for strength1 in strengths:
+        for strength2 in strengths:
+            combined_vector = vectors[0] * strength1 + vectors[1] * strength2
+            response = generate_with_vector(
+                model,
+                tokenizer,
+                input_text,
+                combined_vector,
+                max_new_tokens=max_new_tokens,
+            )
+
+            print(
+                f"{vector_names[0]} Strength: {strength1}, {vector_names[1]} Strength: {strength2}"
+            )
+            print(f"Response: {response[:150]}...\n")
+
+            result = {
+                "vector1_name": vector_names[0],
+                "vector2_name": vector_names[1],
+                # Ensure JSON-serializable
+                "vector1_strength": float(strength1),
+                "vector2_strength": float(strength2),
+                "response": response,
+            }
+            results.append(result)
+
+    if save_to_csv:
+        df = pd.DataFrame(results)
+        df.to_csv(save_to_csv, index=False)
+        print(f"Final responses saved to {save_to_csv}")
+
+    return results

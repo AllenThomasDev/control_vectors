@@ -9,11 +9,13 @@ from control_vectors import (
     train_control_vector,
     load_control_vector,
     generate_with_vector,
+    collect_responses_with_vectors,
 )
 from constants import (
     AI_SUFFIXES,
     INTROVERSION_SUFFIXES,
     OPENAI_API_KEY,
+    STRENGTH_RANGES,
     MODEL_CONFIGS,
     BASE_QUESTION,
 )
@@ -47,10 +49,21 @@ def main():
         help="Vector to use for generation: 'ai' (AI_Optimist vs. AI_Doomer) or 'introvert' (introvert vs. extrovert)",
     )
     parser.add_argument(
+        "--collect",
+        action="store_true",
+        help="Collect responses with all vector strength combinations and save to CSV",
+    )
+    parser.add_argument(
         "--input",
         type=str,
         default=BASE_QUESTION,
-        help="Input prompt for generation (default: BASE_QUESTION from constants.py)",
+        help="Input prompt for generation or collection (default: BASE_QUESTION from constants.py)",
+    )
+    parser.add_argument(
+        "--csv",
+        type=str,
+        default="responses.csv",
+        help="Filename for saving collected responses (default: responses.csv)",
     )
     args = parser.parse_args()
 
@@ -84,6 +97,31 @@ def main():
             )
 
         print(f"Generation complete with model: {MODEL_CONFIGS[model_key]['name']}")
+
+    elif args.collect:
+        # Collection mode
+        ai_control_vector = load_control_vector(model_key, "AI_Optimist", "AI_Doomer")
+        introvert_control_vector = load_control_vector(
+            model_key, "introvert", "extrovert"
+        )
+
+        if not ai_control_vector or not introvert_control_vector:
+            print("Cannot collect responses: Both vectors must be available.")
+        else:
+            vectors = [ai_control_vector, introvert_control_vector]
+            vector_names = ["AI_Optimist_vs_AI_Doomer", "introvert_vs_extrovert"]
+            collect_responses_with_vectors(
+                args.input,
+                model,
+                tokenizer,
+                vectors,
+                vector_names,
+                strength_range=STRENGTH_RANGES,
+                max_new_tokens=256,
+                save_to_csv=args.csv,
+            )
+        print(f"Collection complete with model: {MODEL_CONFIGS[model_key]['name']}")
+
     else:
         # Training and default data collection mode
         train_control_vector(
