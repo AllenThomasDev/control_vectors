@@ -33,9 +33,16 @@ def main():
     parser.add_argument(
         "--model",
         type=str,
-        choices=["hermes", "deepseek"],
-        default="hermes",
-        help="Model to use: 'hermes' or 'deepseek' (default: hermes)",
+        choices=list(MODEL_CONFIGS.keys()),
+        default=list(MODEL_CONFIGS.keys())[0],
+        help="Model to use",
+    )
+    parser.add_argument(
+        "--vectors",
+        nargs="+",  # Accepts one or more values
+        choices=["ai", "introvert"],
+        default=["ai", "introvert"],  # Default to both if not specified
+        help="Vectors to use for collection: 'ai' (AI_Optimist vs. AI_Doomer), 'introvert' (introvert vs. extrovert), or both",
     )
     parser.add_argument(
         "--train",
@@ -287,16 +294,31 @@ def main():
 
     elif args.collect:
         # Collection mode
-        ai_control_vector = load_control_vector(model_key, "AI_Optimist", "AI_Doomer")
-        introvert_control_vector = load_control_vector(
-            model_key, "introvert", "extrovert"
-        )
+        vector_map = {
+            "ai": ("AI_Optimist", "AI_Doomer", "AI_Optimist_vs_AI_Doomer"),
+            "introvert": ("introvert", "extrovert", "introvert_vs_extrovert"),
+        }
+        vectors = []
+        vector_names = []
 
-        if not ai_control_vector or not introvert_control_vector:
-            print("Cannot collect responses: Both vectors must be available.")
+        # Load only the specified vectors
+        for vec in args.vectors:
+            positive_persona, negative_persona, name = vector_map[vec]
+            control_vector = load_control_vector(
+                model_key, positive_persona, negative_persona
+            )
+            if control_vector:
+                vectors.append(control_vector)
+                vector_names.append(name)
+            else:
+                print(
+                    f"Warning: No vector found for {vec} with model {model_key}. Skipping."
+                )
+
+        if not vectors:
+            print("Cannot collect responses: No valid vectors available.")
         else:
-            vectors = [ai_control_vector, introvert_control_vector]
-            vector_names = ["AI_Optimist_vs_AI_Doomer", "introvert_vs_extrovert"]
+            print(f"Collecting responses with vectors: {', '.join(args.vectors)}")
             collect_responses_with_vectors(
                 args.input,
                 model,
