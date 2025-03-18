@@ -1,3 +1,7 @@
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+from openai import OpenAI
+from nltk.corpus import words
+import nltk
 import os
 
 MODEL_CONFIGS = {
@@ -81,3 +85,9 @@ GENERATION_SETTINGS = {
 STRENGTH_RANGES = (-2, 2, 0.5)
 # Base question for data collection
 BASE_QUESTION = "What are your thoughts on the future of AI and how it may impact social interactions?"
+
+# Ensure NLTK words corpus is downloaded
+nltk_data_path = os.path.join(os.path.expanduser("~"), "nltk_data")
+words_path = os.path.join(nltk_data_path, "corpora", "words")
+if not os.path.exists(words_path):
+    nltk.download("words", quiet=True)
