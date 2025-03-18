@@ -1,4 +1,5 @@
-import nltk
+from steering_utils import convert_control_vector_to_steer_config
+import os
 import pandas as pd
 from nltk.corpus import words
 from openai import OpenAI
@@ -35,6 +36,11 @@ def main():
         choices=list(MODEL_CONFIGS.keys()),
         default=list(MODEL_CONFIGS.keys())[0],
         help="Model to use",
+    )
+    parser.add_argument(
+        "--collect",
+        action="store_true",
+        help="Collect responses with all vector strength combinations and save to CSV",
     )
     parser.add_argument(
         "--vectors",
@@ -282,7 +288,51 @@ def main():
                 f"Cannot generate: No vector found for {args.vector} with model {model_key}"
             )
         print(f"Generation complete with model: {MODEL_CONFIGS[model_key]['name']}")
+    elif args.convert:
+        config = CONTROL_VECTOR_CONFIGS[args.convert]
+        control_vector = load_control_vector(
+            model_key, config["positive_persona"], config["negative_persona"]
+        )
+        if control_vector:
+            output_path = f"steer_configs/{args.convert}_steer_config.pt"
+            os.makedirs("steer_configs", exist_ok=True)
+            convert_control_vector_to_steer_config(
+                control_vector.directions, output_path
+            )
+            print(f"Converted {args.convert} control vector to {output_path}")
+        else:
+            print(
+                f"Cannot convert: No vector found for {args.convert} with model {model_key}"
+            )
+        return
+    elif args.collect:
+        vectors = {}
+        for vec in args.vectors:
+            config = CONTROL_VECTOR_CONFIGS[vec]
+            control_vector = load_control_vector(
+                model_key, config["positive_persona"], config["negative_persona"]
+            )
+            if control_vector:
+                vectors[config["vector_name"]] = control_vector
+            else:
+                print(
+                    f"Warning: No vector found for {vec} with model {model_key}. Skipping."
+                )
 
+        if not vectors:
+            print("Cannot collect responses: No valid vectors available.")
+        else:
+            print(f"Collecting responses with vectors: {', '.join(args.vectors)}")
+            collect_responses_with_vectors(
+                args.input,
+                model,
+                tokenizer,
+                vectors,
+                strength_range=STRENGTH_RANGES,
+                max_new_tokens=256,
+                save_to_csv=args.csv,
+            )
+        print(f"Collection complete with model: {MODEL_CONFIGS[model_key]['name']}")
     elif args.collect:
         vectors = {}
         for vec in args.vectors:

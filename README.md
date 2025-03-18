@@ -130,6 +130,26 @@ The project’s main functionality is accessed via the `main.py` script. The ava
     uv run python main.py --plot llm_scores.csv --output-prefix my_project_
     ```
 
+5.  **Convert control vector to be used with lm_eval_harness**
+    Converts the ai control vector to steer_configs/ai_steer_config.pt for use with lm-evaluation-harness.
+
+    ```bash
+    uv run python main.py --model hermes --convert ai
+
+    #use it like - 
+    lm_eval --model steered \
+    --model_args pretrained=NousResearch/Hermes-3-Llama-3.2-3B,steer_path=steer_configs/ai_steer_config.pt \
+    --tasks lambada_openai,hellaswag \
+    --device cuda:0 \
+    --batch_size 8
+
+    ```
+
+    To specify an output prefix for the plots:
+
+    ```bash
+    uv run python main.py --plot llm_scores.csv --output-prefix my_project_
+    ```
 ## Command-Line Arguments Overview
 
 *   `--model`
