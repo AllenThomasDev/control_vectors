@@ -24,9 +24,7 @@ control_vectors = {
 }
 
 
-def chat_interface(
-    input_text, ai_optimism_strength, introversion_strength, show_baseline, max_tokens
-):
+def chat_interface(input_text, ai_optimism_strength, introversion_strength, max_tokens):
     if not input_text:
         return "Please enter some text."
 
@@ -46,7 +44,6 @@ def chat_interface(
         input_text,
         *vectors,
         max_new_tokens=max_tokens,
-        show_baseline=show_baseline,
         render=False,
     )
 
@@ -74,7 +71,6 @@ with gr.Blocks(title="Vector-Controlled Chatbot") as demo:
     max_tokens = gr.Slider(
         minimum=50, maximum=500, step=10, value=256, label="Max New Tokens"
     )
-    show_baseline = gr.Checkbox(label="Show Baseline Response", value=False)
     submit_btn = gr.Button("Generate")
 
     with gr.Column():
@@ -86,7 +82,6 @@ with gr.Blocks(title="Vector-Controlled Chatbot") as demo:
             input_text,
             ai_optimism_slider,
             introversion_slider,
-            show_baseline,
             max_tokens,
         ],
         outputs=output_text,
