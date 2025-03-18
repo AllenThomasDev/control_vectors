@@ -293,23 +293,18 @@ def main():
         print(f"Generation complete with model: {MODEL_CONFIGS[model_key]['name']}")
 
     elif args.collect:
-        # Collection mode
         vector_map = {
             "ai": ("AI_Optimist", "AI_Doomer", "AI_Optimist_vs_AI_Doomer"),
             "introvert": ("introvert", "extrovert", "introvert_vs_extrovert"),
         }
-        vectors = []
-        vector_names = []
-
-        # Load only the specified vectors
+        vectors = {}
         for vec in args.vectors:
             positive_persona, negative_persona, name = vector_map[vec]
             control_vector = load_control_vector(
                 model_key, positive_persona, negative_persona
             )
             if control_vector:
-                vectors.append(control_vector)
-                vector_names.append(name)
+                vectors[name] = control_vector
             else:
                 print(
                     f"Warning: No vector found for {vec} with model {model_key}. Skipping."
