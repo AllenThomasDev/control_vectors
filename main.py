@@ -38,6 +38,12 @@ def main():
         help="Model to use: 'hermes' or 'deepseek' (default: hermes)",
     )
     parser.add_argument(
+        "--train",
+        type=str,
+        choices=["ai", "introvert"],
+        help="Train a specific control vector: 'ai' (AI_Optimist vs. AI_Doomer) or 'introvert' (introvert vs. extrovert)",
+    )
+    parser.add_argument(
         "--generate",
         action="store_true",
         help="Generate text using a control vector instead of training (requires --vector)",
@@ -303,42 +309,33 @@ def main():
             )
         print(f"Collection complete with model: {MODEL_CONFIGS[model_key]['name']}")
 
-    else:
-        # Training and default data collection mode
+    if args.train:
+        vector_configs = {
+            "ai": (AI_SUFFIXES, ai_template, "AI_Optimist", "AI_Doomer"),
+            "introvert": (
+                INTROVERSION_SUFFIXES,
+                social_template,
+                "introvert",
+                "extrovert",
+            ),
+        }
+        suffixes, template_func, positive_persona, negative_persona = vector_configs[
+            args.train
+        ]
+        print(f"Training {args.train} control vector...")
         train_control_vector(
             model,
             tokenizer,
-            AI_SUFFIXES,
-            ai_template,
-            "AI_Optimist",
-            "AI_Doomer",
+            suffixes,
+            template_func,
+            positive_persona,
+            negative_persona,
             model_key,
         )
-        train_control_vector(
-            model,
-            tokenizer,
-            INTROVERSION_SUFFIXES,
-            social_template,
-            "introvert",
-            "extrovert",
-            model_key,
-        )
-
-        ai_control_vector = load_control_vector(model_key, "AI_Optimist", "AI_Doomer")
-        introvert_control_vector = load_control_vector(
-            model_key, "introvert", "extrovert"
-        )
-
-        if ai_control_vector:
-            print("\nGenerating with AI Optimist control vector:")
-            output = generate_with_vector(
-                model, tokenizer, BASE_QUESTION, ai_control_vector * 1
-            )
-            print(output)
-
         print(
-            f"Setup, training, and data collection complete with model: {MODEL_CONFIGS[model_key]['name']}"
+            f"Training complete for {args.train} with model: {MODEL_CONFIGS[model_key]['name']}"
         )
+        return
 
 
 if __name__ == "__main__":
