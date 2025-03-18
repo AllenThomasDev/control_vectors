@@ -325,6 +325,7 @@ def main():
                 tokenizer,
                 vectors,
                 vector_names,
+                strength_range=STRENGTH_RANGES,  # Ensure this is correctly set
                 max_new_tokens=256,
                 save_to_csv=args.csv,
             )

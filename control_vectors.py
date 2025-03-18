@@ -135,12 +135,18 @@ def collect_responses_with_vectors(
     Returns:
         list: List of result dictionaries with vector names, strengths, and responses.
     """
-    # Ensure strength_range is a tuple of three values
     if strength_range is None:
-        strength_range = (-2, 2, 0.5)  # Default range
-    elif not (isinstance(strength_range, tuple) and len(strength_range) == 3):
-        raise ValueError("strength_range must be a tuple (start, end, step).")
+        strength_range = (-2, 2, 0.5)
 
+    # Debugging line
+    print(f"DEBUG: strength_range = {strength_range}, type = {type(strength_range)}")
+
+    if not (isinstance(strength_range, tuple) and len(strength_range) == 3):
+        raise ValueError(
+            f"strength_range must be a tuple (start, end, step), but got {strength_range}"
+        )
+
+    start, end, step = strength_range
     start, end, step = strength_range
     strengths = np.arange(start, end + step, step)
     vector_names = list(vectors.keys())
