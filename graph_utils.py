@@ -537,9 +537,6 @@ def plot_control_vs_llm_scores(
     fig.show()
 
 
-results = pd.read_csv("multi_vector_responses_deepseek(2).csv")
-
-
 def personality_detection(text):
     """Detect personality traits from text using a pre-trained BERT model."""
     tokenizer = BertTokenizer.from_pretrained("Minej/bert-base-personality")
