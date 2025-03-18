@@ -41,10 +41,11 @@ def chat_interface(input_text, ai_optimism_strength, introversion_strength, max_
 
     # Generate the response
     response = generate_with_vector(
+        model,
+        tokenizer,
         input_text,
         *vectors,
         max_new_tokens=max_tokens,
-        render=False,
     )
 
     return response
