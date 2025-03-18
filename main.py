@@ -324,8 +324,7 @@ def main():
                 model,
                 tokenizer,
                 vectors,
-                vector_names,
-                strength_range=tuple(STRENGTH_RANGES),
+                strength_range=STRENGTH_RANGES,
                 max_new_tokens=256,
                 save_to_csv=args.csv,
             )
