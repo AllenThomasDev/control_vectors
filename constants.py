@@ -78,6 +78,6 @@ GENERATION_SETTINGS = {
     "repetition_penalty": 1.3,
     "eos_token_id": None,  # Will be set dynamically with tokenizer.eos_token_id
 }
-
+STRENGTH_RANGES = (-2, 2, 0.5)
 # Base question for data collection
 BASE_QUESTION = "What are your thoughts on the future of AI and how it may impact social interactions?"
