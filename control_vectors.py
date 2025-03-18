@@ -120,6 +120,21 @@ def collect_responses_with_vectors(
     max_new_tokens: int = 256,
     save_to_csv: str = None,
 ):
+    """
+    Collect responses by applying control vectors with varying strengths.
+
+    Args:
+        input_text (str): The input prompt for generation.
+        model: The model object for text generation.
+        tokenizer: The tokenizer for the model.
+        vectors (dict): Dictionary of vector names to control vector objects (e.g., {"AI_Optimist_vs_AI_Doomer": vector1, ...}).
+        strength_range (tuple): Tuple of (start, end, step) for strength values (default: (-2, 2, 0.5)).
+        max_new_tokens (int): Maximum tokens to generate (default: 256).
+        save_to_csv (str): Optional filename to save results as CSV.
+
+    Returns:
+        list: List of result dictionaries with vector names, strengths, and responses.
+    """
     start, end, step = strength_range
     strengths = np.arange(start, end + step, step)
     vector_names = list(vectors.keys())
@@ -128,12 +143,19 @@ def collect_responses_with_vectors(
     strength_combinations = list(product(strengths, repeat=num_vectors))
     results = []
     for combo in tqdm(strength_combinations, desc="Generating responses"):
-        combined_vector = sum(
+        # Scale each vector by its strength and sum them
+        scaled_vectors = [
             vectors[name] * strength for name, strength in zip(vector_names, combo)
-        )
-        response = generate_with_vector(
-            model, tokenizer, input_text, combined_vector, max_new_tokens
-        )
+        ]
+        # Handle empty case, though unlikely here
+        combined_vector = sum(scaled_vectors) if scaled_vectors else None
+
+        if combined_vector is not None:
+            response = generate_with_vector(
+                model, tokenizer, input_text, combined_vector, max_new_tokens
+            )
+        else:
+            response = "No vectors provided"
 
         result = {f"vector{i + 1}_name": name for i, name in enumerate(vector_names)}
         result.update(
