@@ -331,5 +331,4 @@ def main():
 
 
 if __name__ == "__main__":
-    # Delayed import to avoid circular issues
     main()

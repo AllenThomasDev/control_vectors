@@ -1,6 +1,3 @@
-from constants import (
-    STRENGTH_RANGES,
-)
 import torch
 from tqdm import tqdm
 from itertools import product
