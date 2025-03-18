@@ -1,7 +1,7 @@
-# control_vectors.py
 import torch
 import os
 from repeng import ControlVector, DatasetEntry
+from IPython.display import HTML as IPyHTML
 
 
 def ai_template(persona: str, suffix: str) -> str:
@@ -64,4 +64,42 @@ def load_control_vector(model_name, positive_persona, negative_persona):
         print(f"Loaded control vector from {vector_path}")
         return vector
     print(f"No control vector found at {vector_path}")
+    return None
+
+
+def generate_with_vector(
+    model,
+    tokenizer,
+    input_str: str,
+    *vectors,
+    max_new_tokens=256,
+):
+    """Generate text with optional control vectors applied."""
+    from constants import GENERATION_SETTINGS
+
+    settings = GENERATION_SETTINGS.copy()
+    settings["pad_token_id"] = tokenizer.eos_token_id
+    settings["eos_token_id"] = tokenizer.eos_token_id
+    settings["max_new_tokens"] = max_new_tokens
+
+    input_ids = tokenizer(
+        tokenizer.apply_chat_template(
+            [{"role": "user", "content": input_str}],
+            add_generation_prompt=True,
+            tokenize=False,
+        ),
+        return_tensors="pt",
+    ).to(model.device)
+
+    def gen():
+        output_ids = model.generate(**input_ids, **settings)
+        return tokenizer.decode(output_ids[0], skip_special_tokens=True)
+
+    for vector in vectors:
+        model.set_control(vector)
+        output = gen()
+        model.reset()
+        return output
+
+    model.reset()
     return None

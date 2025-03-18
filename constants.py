@@ -71,3 +71,13 @@ INTROVERSION_SUFFIXES = [
 # API Keys (hardcoded for now, consider environment variables)
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 HF_TOKEN = os.getenv("HF_TOKEN")
+GENERATION_SETTINGS = {
+    "pad_token_id": None,  # Will be set dynamically with tokenizer.eos_token_id
+    "do_sample": False,  # Equivalent to temperature=0
+    "max_new_tokens": 256,
+    "repetition_penalty": 1.3,
+    "eos_token_id": None,  # Will be set dynamically with tokenizer.eos_token_id
+}
+
+# Base question for data collection
+BASE_QUESTION = "What are your thoughts on the future of AI and how it may impact social interactions?"
