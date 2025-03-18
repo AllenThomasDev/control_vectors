@@ -85,8 +85,8 @@ def main():
 
     # New enrichment function
     if args.enrich:
-        from analysis.personality_analysis import process_personality_results
-        from analysis.llm_evaluation import judge_responses_multiple_metrics
+        from graph_utils import process_personality_results
+        from graph_utils import judge_responses_multiple_metrics
 
         print(f"Loading data from {args.enrich}...")
         results = pd.read_csv(args.enrich)
@@ -120,7 +120,7 @@ def main():
 
     # New plotting function
     if args.plot:
-        from analysis.visualization import (
+        from graph_utils import (
             create_heatmap,
             response_length,
             short_word_ratio,
