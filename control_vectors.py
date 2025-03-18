@@ -1,3 +1,6 @@
+from constants import (
+    STRENGTH_RANGES,
+)
 import torch
 from tqdm import tqdm
 from itertools import product
@@ -113,7 +116,7 @@ def collect_responses_with_vectors(
     model,
     tokenizer,
     vectors: dict,
-    strength_range=(-2, 2, 0.5),
+    strength_range=STRENGTH_RANGES,
     max_new_tokens: int = 256,
     save_to_csv: str = None,
 ):
