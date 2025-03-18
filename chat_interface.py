@@ -34,12 +34,12 @@ def chat_interface(
     vectors = []
     if ai_optimism_strength != 0 and control_vectors["ai_optimism"]:
         scaled_ai_vector = control_vectors["ai_optimism"] * ai_optimism_strength
-    vectors.append(scaled_ai_vector)
+        vectors.append(scaled_ai_vector)
     if introversion_strength != 0 and control_vectors["introversion"]:
         scaled_introvert_vector = (
             control_vectors["introversion"] * introversion_strength
         )
-    vectors.append(scaled_introvert_vector)
+        vectors.append(scaled_introvert_vector)
 
     # Generate the response
     response = generate_with_vector(
