@@ -1,7 +1,6 @@
 import torch
 import os
 from repeng import ControlVector, DatasetEntry
-from IPython.display import HTML as IPyHTML
 
 
 def ai_template(persona: str, suffix: str) -> str:
