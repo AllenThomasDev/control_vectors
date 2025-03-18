@@ -1,7 +1,6 @@
-from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
-from openai import OpenAI
+# Assuming these are defined in control_vectors.py
+from control_vectors import ai_template, social_template
 from nltk.corpus import words
-import nltk
 import os
 
 MODEL_CONFIGS = {
@@ -87,3 +86,19 @@ STRENGTH_RANGES = (-2, 2, 0.5)
 BASE_QUESTION = "What are your thoughts on the future of AI and how it may impact social interactions?"
 
 ENGLISH_WORDS = set(words.words())
+CONTROL_VECTOR_CONFIGS = {
+    "ai": {
+        "suffixes": AI_SUFFIXES,
+        "template": ai_template,
+        "positive_persona": "AI_Optimist",
+        "negative_persona": "AI_Doomer",
+        "vector_name": "AI_Optimist_vs_AI_Doomer",
+    },
+    "introvert": {
+        "suffixes": INTROVERSION_SUFFIXES,
+        "template": social_template,
+        "positive_persona": "introvert",
+        "negative_persona": "extrovert",
+        "vector_name": "introvert_vs_extrovert",
+    },
+}

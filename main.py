@@ -12,12 +12,11 @@ from control_vectors import (
     collect_responses_with_vectors,
 )
 from constants import (
-    AI_SUFFIXES,
-    INTROVERSION_SUFFIXES,
     OPENAI_API_KEY,
     STRENGTH_RANGES,
     MODEL_CONFIGS,
     BASE_QUESTION,
+    CONTROL_VECTOR_CONFIGS,  # Add this, remove AI_SUFFIXES and INTROVERSION_SUFFIXES
 )
 
 # Load the NLTK words corpus (assumes it's available via setup.py)
@@ -39,16 +38,16 @@ def main():
     )
     parser.add_argument(
         "--vectors",
-        nargs="+",  # Accepts one or more values
-        choices=["ai", "introvert"],
-        default=["ai", "introvert"],  # Default to both if not specified
-        help="Vectors to use for collection: 'ai' (AI_Optimist vs. AI_Doomer), 'introvert' (introvert vs. extrovert), or both",
+        nargs="+",
+        choices=list(CONTROL_VECTOR_CONFIGS.keys()),  # Use config keys
+        default=list(CONTROL_VECTOR_CONFIGS.keys()),
+        help="Vectors to use for collection",
     )
     parser.add_argument(
         "--train",
         type=str,
-        choices=["ai", "introvert"],
-        help="Train a specific control vector: 'ai' (AI_Optimist vs. AI_Doomer) or 'introvert' (introvert vs. extrovert)",
+        choices=list(CONTROL_VECTOR_CONFIGS.keys()),  # Use config keys
+        help="Train a specific control vector",
     )
     parser.add_argument(
         "--generate",
@@ -58,7 +57,7 @@ def main():
     parser.add_argument(
         "--vector",
         type=str,
-        choices=["ai", "introvert"],
+        choices=list(CONTROL_VECTOR_CONFIGS.keys()),
         help="Vector to use for generation: 'ai' (AI_Optimist vs. AI_Doomer) or 'introvert' (introvert vs. extrovert)",
     )
     parser.add_argument(
@@ -266,19 +265,12 @@ def main():
     model_key = args.model.lower()
 
     if args.generate:
-        # Generation mode
         if not args.vector:
             parser.error("--generate requires --vector to specify which vector to use.")
-
-        vector_map = {
-            "ai": ("AI_Optimist", "AI_Doomer"),
-            "introvert": ("introvert", "extrovert"),
-        }
-        positive_persona, negative_persona = vector_map[args.vector]
+        config = CONTROL_VECTOR_CONFIGS[args.vector]
         control_vector = load_control_vector(
-            model_key, positive_persona, negative_persona
+            model_key, config["positive_persona"], config["negative_persona"]
         )
-
         if control_vector:
             print(f"\nGenerating with {args.vector} control vector:")
             output = generate_with_vector(
@@ -289,22 +281,17 @@ def main():
             print(
                 f"Cannot generate: No vector found for {args.vector} with model {model_key}"
             )
-
         print(f"Generation complete with model: {MODEL_CONFIGS[model_key]['name']}")
 
     elif args.collect:
-        vector_map = {
-            "ai": ("AI_Optimist", "AI_Doomer", "AI_Optimist_vs_AI_Doomer"),
-            "introvert": ("introvert", "extrovert", "introvert_vs_extrovert"),
-        }
         vectors = {}
         for vec in args.vectors:
-            positive_persona, negative_persona, name = vector_map[vec]
+            config = CONTROL_VECTOR_CONFIGS[vec]
             control_vector = load_control_vector(
-                model_key, positive_persona, negative_persona
+                model_key, config["positive_persona"], config["negative_persona"]
             )
             if control_vector:
-                vectors[name] = control_vector
+                vectors[config["vector_name"]] = control_vector
             else:
                 print(
                     f"Warning: No vector found for {vec} with model {model_key}. Skipping."
@@ -325,27 +312,16 @@ def main():
             )
         print(f"Collection complete with model: {MODEL_CONFIGS[model_key]['name']}")
 
-    if args.train:
-        vector_configs = {
-            "ai": (AI_SUFFIXES, ai_template, "AI_Optimist", "AI_Doomer"),
-            "introvert": (
-                INTROVERSION_SUFFIXES,
-                social_template,
-                "introvert",
-                "extrovert",
-            ),
-        }
-        suffixes, template_func, positive_persona, negative_persona = vector_configs[
-            args.train
-        ]
+    elif args.train:  # Changed from if to elif
+        config = CONTROL_VECTOR_CONFIGS[args.train]
         print(f"Training {args.train} control vector...")
         train_control_vector(
             model,
             tokenizer,
-            suffixes,
-            template_func,
-            positive_persona,
-            negative_persona,
+            config["suffixes"],
+            config["template"],
+            config["positive_persona"],
+            config["negative_persona"],
             model_key,
         )
         print(
@@ -356,6 +332,4 @@ def main():
 
 if __name__ == "__main__":
     # Delayed import to avoid circular issues
-    from control_vectors import ai_template, social_template
-
     main()
