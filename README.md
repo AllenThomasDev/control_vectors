@@ -178,3 +178,53 @@ The project’s main functionality is accessed via the `main.py` script. The ava
 *   `setup.py`
     Setup script to download necessary resources (e.g., the NLTK words corpus).
 
+
+# How to train your own control vectors - 
+
+Here’s a step-by-step guide:
+Step 1: Open constants.py
+
+Step 2: Define Your Suffixes
+Suffixes are partial sentences that the model will complete differently based on the persona (e.g., "happy" or "sad"). Create a list of these prompts that are neutral enough to work with both personas. Add this suffix list to the config file
+
+Step 3: Create a Template Function
+The template function combines a persona (e.g., "happy" or "sad") with a suffix to form a complete prompt for training. You’ll define this in control_vectors.py. Open that file and add a new function:
+```python
+def happiness_template(persona, suffix):
+    return f"As a {persona} person, {suffix}"
+```
+Step 4: Add Your Config to CONTROL_VECTOR_CONFIGS
+Back in constants.py, scroll to the CONTROL_VECTOR_CONFIGS dictionary. Add a new entry for your vector. The key (e.g., "happiness") is what you’ll use in commands like --train happiness. Here’s how to add it:
+```python
+from control_vectors import happiness_template  # Add this import
+
+CONTROL_VECTOR_CONFIGS = {
+    "ai": {
+        "suffixes": AI_SUFFIXES,
+        "template": ai_template,
+        "positive_persona": "AI_Optimist",
+        "negative_persona": "AI_Doomer",
+        "vector_name": "AI_Optimist_vs_AI_Doomer",
+    },
+    "introvert": {
+        "suffixes": INTROVERSION_SUFFIXES,
+        "template": social_template,
+        "positive_persona": "introvert",
+        "negative_persona": "extrovert",
+        "vector_name": "introvert_vs_extrovert",
+    },
+    "happiness": {  # Your new vector
+        "suffixes": HAPPINESS_SUFFIXES,
+        "template": happiness_template,
+        "positive_persona": "happy",
+        "negative_persona": "sad",
+        "vector_name": "happy_vs_sad"
+    },
+}
+```
+
+Step 5: Train Your Vector
+Run the training command with your new vector key:
+```bash
+uv run python main.py --model hermes --train happiness
+```
