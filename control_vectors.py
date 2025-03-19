@@ -103,9 +103,10 @@ def generate_with_vector(
 
     # Apply vectors if provided
     if vectors:
-        combined_vector = vectors[0].clone()  # Start with the first vector
+        combined_vector = vectors[0]  # Start with the first vector
         for v in vectors[1:]:  # Add remaining vectors
-            combined_vector += v
+            combined_vector = combined_vector.add(v)  # Use an explicit add method
+
         model.set_control(combined_vector)
 
     # Generate and return output (with or without vectors)
