@@ -248,3 +248,26 @@ Run the training command with your new vector key:
 ```bash
 uv run python main.py --model hermes --train happiness
 ```
+
+You can also run an chat interface based on your control vector - 
+```bash
+uv run python chat_interface.py
+```
+
+pick the vectors to be used in the same file - 
+these are the defaults - 
+```python
+control_vectors = {
+    "ai_optimism": load_control_vector(
+        model_key,
+        CONTROL_VECTOR_CONFIGS["ai"]["positive_persona"],
+        CONTROL_VECTOR_CONFIGS["ai"]["negative_persona"],
+    ),
+    "introversion": load_control_vector(
+        model_key,
+        CONTROL_VECTOR_CONFIGS["introvert"]["positive_persona"],
+        CONTROL_VECTOR_CONFIGS["introvert"]["negative_persona"],
+    ),
+}
+
+```
