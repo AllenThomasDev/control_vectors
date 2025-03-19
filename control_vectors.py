@@ -98,14 +98,19 @@ def generate_with_vector(
         output_ids = model.generate(**input_ids, **settings)
         return tokenizer.decode(output_ids[0], skip_special_tokens=True)
 
-    for vector in vectors:
-        model.set_control(vector)
-        output = gen()
-        model.reset()
-        return output
-
+    # Reset model to baseline state
     model.reset()
-    return None
+
+    # Apply vectors if provided
+    if vectors:
+        # Combine all vectors into one (assuming ControlVector supports addition)
+        combined_vector = sum(vectors)
+        model.set_control(combined_vector)
+
+    # Generate and return output (with or without vectors)
+    output = gen()
+    model.reset()  # Clean up after generation
+    return output
 
 
 def collect_responses_with_vectors(
