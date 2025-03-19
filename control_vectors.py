@@ -103,8 +103,9 @@ def generate_with_vector(
 
     # Apply vectors if provided
     if vectors:
-        # Combine all vectors into one (assuming ControlVector supports addition)
-        combined_vector = sum(vectors)
+        combined_vector = vectors[0].clone()  # Start with the first vector
+        for v in vectors[1:]:  # Add remaining vectors
+            combined_vector += v
         model.set_control(combined_vector)
 
     # Generate and return output (with or without vectors)
